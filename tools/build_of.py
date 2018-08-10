@@ -11,12 +11,17 @@ out_path = ''
 
 
 def dump_frames(vid_path):
+    
+    # vid_path = vid_item[0]
+    # vid_id = vid_item[1]
+    print "1", vid_path
     import cv2
     video = cv2.VideoCapture(vid_path)
     vid_name = vid_path.split('/')[-1].split('.')[0]
     out_full_path = os.path.join(out_path, vid_name)
 
-    fcount = int(video.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
+    fcount = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    print "2", vid_path, fcount
     try:
         os.mkdir(out_full_path)
     except OSError:
@@ -24,10 +29,12 @@ def dump_frames(vid_path):
     file_list = []
     for i in xrange(fcount):
         ret, frame = video.read()
-        assert ret
-        cv2.imwrite('{}/{:06d}.jpg'.format(out_full_path, i), frame)
-        access_path = '{}/{:06d}.jpg'.format(vid_name, i)
-        file_list.append(access_path)
+        if ret:
+            cv2.imwrite('{}/{:06d}.jpg'.format(out_full_path, i), frame)
+            access_path = '{}/{:06d}.jpg'.format(vid_name, i)
+            file_list.append(access_path)
+        else:
+            break
     print '{} done'.format(vid_name)
     sys.stdout.flush()
     return file_list
@@ -114,8 +121,16 @@ if __name__ == '__main__':
 
     vid_list = glob.glob(src_path+'/*/*.'+ext)
     print len(vid_list)
-    pool = Pool(num_worker)
+    # pool = Pool(num_worker)
+    # pool.map(dump_frames, zip(vid_list, xrange(len(vid_list))))
+    
+    # dump_frames("UCF-101/Drumming/v_Drumming_g06_c04.avi")
+
+    for i in xrange(len(vid_list)):
+        dump_frames(vid_list[i])
+    '''
     if flow_type == 'tvl1':
         pool.map(run_optical_flow, zip(vid_list, xrange(len(vid_list))))
     elif flow_type == 'warp_tvl1':
         pool.map(run_warp_optical_flow, zip(vid_list, xrange(len(vid_list))))
+    '''
